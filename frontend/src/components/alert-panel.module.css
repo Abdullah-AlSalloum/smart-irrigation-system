@@ -1,0 +1,169 @@
+.panel {
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 480px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #cdd6f4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  background: #f38ba8;
+  color: #1e1e2e;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 7px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.markAllBtn {
+  background: none;
+  border: 1px solid #45475a;
+  color: #a6adc8;
+  font-size: 0.72rem;
+  border-radius: 6px;
+  padding: 4px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.markAllBtn:hover {
+  border-color: #89b4fa;
+  color: #89b4fa;
+}
+
+.empty {
+  color: #6c7086;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.item {
+  background: #181825;
+  border: 1px solid #313244;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.item.read {
+  opacity: 0.55;
+}
+
+.item.critical {
+  border-left: 3px solid #f38ba8;
+}
+
+.item.warning {
+  border-left: 3px solid #fab387;
+}
+
+.item.info {
+  border-left: 3px solid #89b4fa;
+}
+
+.itemTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.severityBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.criticalBadge {
+  background: #f38ba8;
+  color: #1e1e2e;
+}
+
+.warningBadge {
+  background: #fab387;
+  color: #1e1e2e;
+}
+
+.infoBadge {
+  background: #89b4fa;
+  color: #1e1e2e;
+}
+
+.typeTag {
+  font-size: 0.72rem;
+  color: #a6adc8;
+  background: #313244;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.time {
+  font-size: 0.7rem;
+  color: #6c7086;
+  margin-left: auto;
+}
+
+.message {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #cdd6f4;
+  line-height: 1.4;
+}
+
+.readBtn {
+  align-self: flex-end;
+  background: none;
+  border: 1px solid #45475a;
+  color: #6c7086;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.readBtn:hover {
+  border-color: #a6e3a1;
+  color: #a6e3a1;
+}

@@ -9,8 +9,12 @@ import {
   fetchDevices,
   fetchPumpStatus,
   fetchSensorHistory,
+  fetchAlerts,
+  markAlertRead,
+  markAllAlertsRead,
   turnPumpOff,
   turnPumpOn,
+  type Alert,
   type PumpStatusResponse,
 } from "@/lib/protected-api-client";
 import { createSensorSocket } from "@/lib/socket-client";
@@ -18,6 +22,7 @@ import { DeviceSelector } from "@/components/device-selector";
 import { SensorPanel } from "@/components/sensor-panel";
 import { PumpControlPanel } from "@/components/pump-control";
 import { SensorChartPanel, type SensorChartPoint } from "@/components/sensor-chart-panel";
+import AlertPanel from "@/components/alert-panel";
 
 interface Device {
   id: string;
@@ -64,6 +69,8 @@ export default function Dashboard() {
   const [chartHours, setChartHours] = useState(24);
   const [chartLoading, setChartLoading] = useState(false);
   const [sensorHistory, setSensorHistory] = useState<SensorChartPoint[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
   const [pumpLoading, setPumpLoading] = useState(false);
   const [pumpError, setPumpError] = useState("");
   const [pumpStatus, setPumpStatus] = useState<PumpStatusResponse>({
@@ -112,6 +119,7 @@ export default function Dashboard() {
     if (isLoggedIn && selectedDeviceId) {
       void loadSensorHistory(selectedDeviceId, chartHours);
       void loadPumpStatus(selectedDeviceId);
+      void loadAlerts(selectedDeviceId);
     }
   }, [chartHours, isLoggedIn, selectedDeviceId]);
 
@@ -179,6 +187,33 @@ export default function Dashboard() {
     } finally {
       setChartLoading(false);
     }
+  }
+
+  async function loadAlerts(deviceId: string) {
+    try {
+      setAlertsLoading(true);
+      const response = await fetchAlerts(deviceId, 50);
+      if (response.data) {
+        setAlerts(response.data);
+      }
+    } catch (error) {
+      console.error("Error loading alerts:", error);
+    } finally {
+      setAlertsLoading(false);
+    }
+  }
+
+  async function handleMarkAlertRead(alertId: string) {
+    await markAlertRead(alertId);
+    setAlerts((prev) =>
+      prev.map((a) => (a.id === alertId ? { ...a, isRead: true } : a))
+    );
+  }
+
+  async function handleMarkAllAlertsRead() {
+    if (!selectedDeviceId) return;
+    await markAllAlertsRead(selectedDeviceId);
+    setAlerts((prev) => prev.map((a) => ({ ...a, isRead: true })));
   }
 
   async function loadPumpStatus(deviceId: string) {
@@ -285,6 +320,12 @@ export default function Dashboard() {
       }
     });
 
+    socket.on("alert", (payload: Alert) => {
+      if (payload.deviceId === selectedDeviceIdRef.current) {
+        setAlerts((prev) => [payload, ...prev].slice(0, 50));
+      }
+    });
+
     socket.on("connect_error", (error: Error) => {
       console.error("Socket connection error:", error);
     });
@@ -353,6 +394,7 @@ export default function Dashboard() {
       lastAction: "",
       lastReason: "",
     });
+    setAlerts([]);
   }
 
   // Login/Register screen
@@ -487,6 +529,12 @@ export default function Dashboard() {
             errorMessage={pumpError}
             isLoading={pumpLoading}
             onControlChange={handlePumpControl}
+          />
+          <AlertPanel
+            alerts={alerts}
+            isLoading={alertsLoading}
+            onMarkRead={handleMarkAlertRead}
+            onMarkAllRead={handleMarkAllAlertsRead}
           />
         </aside>
       </div>

@@ -33,6 +33,16 @@ export interface PumpStatusResponse {
   lastReason: string;
 }
 
+export interface Alert {
+  id: string;
+  deviceId: string;
+  type: string;
+  message: string;
+  severity: "info" | "warning" | "critical";
+  isRead: boolean;
+  createdAt: string;
+}
+
 /**
  * Korumalı API çağrısı yapar - Authorization header'ı ekler
  * @param url API endpoint'i (örn: '/devices')
@@ -160,5 +170,43 @@ export async function turnPumpOff(
 
   return fetchWithToken<PumpStatusResponse>(`${baseUrl}/pump/off/${deviceId}`, {
     method: 'POST',
+  });
+}
+
+/**
+ * Cihaza ait uyarıları getir
+ */
+export async function fetchAlerts(
+  deviceId: string,
+  limit = 50,
+): Promise<ApiResponse<Alert[]>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<Alert[]>(`${baseUrl}/alerts/${deviceId}?limit=${limit}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Uyarıyı okundu olarak işaretle
+ */
+export async function markAlertRead(alertId: string): Promise<ApiResponse<Alert>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<Alert>(`${baseUrl}/alerts/${alertId}/read`, {
+    method: 'PATCH',
+  });
+}
+
+/**
+ * Cihaza ait tüm uyarıları okundu olarak işaretle
+ */
+export async function markAllAlertsRead(
+  deviceId: string,
+): Promise<ApiResponse<{ count: number }>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<{ count: number }>(`${baseUrl}/alerts/${deviceId}/read-all`, {
+    method: 'PATCH',
   });
 }

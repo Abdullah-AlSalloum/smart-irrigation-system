@@ -10,6 +10,7 @@ import { DevicesModule } from './modules/devices/devices.module';
 import { PumpModule } from './modules/pump/pump.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
 import { AutomationModule } from './modules/automation/automation.module';
+import { AlertsModule } from './modules/alerts/alerts.module';
 import { DatabaseService } from './common/database.service';
 import { ConfigService } from './config/config.service';
 
@@ -39,6 +40,7 @@ import { ConfigService } from './config/config.service';
     PumpModule,
     WebSocketModule,
     AutomationModule,
+    AlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseService, ConfigService],
