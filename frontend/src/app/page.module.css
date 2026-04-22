@@ -25,9 +25,83 @@
   max-width: 800px;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 18px;
   background-color: var(--foreground);
   padding: 120px 60px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--text-primary);
+  color: var(--background);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  composes: button;
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--button-secondary-border);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.logPanel {
+  width: 100%;
+  border: 1px solid var(--button-secondary-border);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.logHeader {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logEmpty {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.logItem {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--button-secondary-border) 40%, transparent);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  word-break: break-word;
 }
 
 .intro {
@@ -110,6 +184,10 @@ a.secondary {
 @media (max-width: 600px) {
   .main {
     padding: 48px 24px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
   }
 
   .intro {
