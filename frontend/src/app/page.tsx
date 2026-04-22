@@ -5,11 +5,19 @@ import type { Socket } from "socket.io-client";
 import styles from "./dashboard.module.css";
 import { registerUser } from "@/lib/api-client";
 import { clearStoredToken, getStoredToken, loginAndStoreToken } from "@/lib/auth-service";
-import { fetchDevices } from "@/lib/protected-api-client";
+import {
+  fetchDevices,
+  fetchPumpStatus,
+  fetchSensorHistory,
+  turnPumpOff,
+  turnPumpOn,
+  type PumpStatusResponse,
+} from "@/lib/protected-api-client";
 import { createSensorSocket } from "@/lib/socket-client";
 import { DeviceSelector } from "@/components/device-selector";
 import { SensorPanel } from "@/components/sensor-panel";
 import { PumpControlPanel } from "@/components/pump-control";
+import { SensorChartPanel, type SensorChartPoint } from "@/components/sensor-chart-panel";
 
 interface Device {
   id: string;
@@ -26,6 +34,7 @@ interface SensorData {
 
 export default function Dashboard() {
   const socketRef = useRef<Socket | null>(null);
+  const selectedDeviceIdRef = useRef<string>("");
   
   // Auth mode: login or register
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
@@ -52,6 +61,17 @@ export default function Dashboard() {
   const [currentSensorData, setCurrentSensorData] = useState<SensorData | null>(null);
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [chartHours, setChartHours] = useState(24);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [sensorHistory, setSensorHistory] = useState<SensorChartPoint[]>([]);
+  const [pumpLoading, setPumpLoading] = useState(false);
+  const [pumpError, setPumpError] = useState("");
+  const [pumpStatus, setPumpStatus] = useState<PumpStatusResponse>({
+    deviceId: "",
+    status: "OFF",
+    lastAction: "",
+    lastReason: "",
+  });
 
 
   // Load devices and connect socket on mount if logged in
@@ -80,10 +100,20 @@ export default function Dashboard() {
 
   // Auto-subscribe to device when selected
   useEffect(() => {
+    selectedDeviceIdRef.current = selectedDeviceId;
+
     if (selectedDeviceId && socketRef.current?.connected) {
       socketRef.current.emit("subscribe", { deviceId: selectedDeviceId });
     }
   }, [selectedDeviceId]);
+
+  // Load chart history whenever selected device or range changes
+  useEffect(() => {
+    if (isLoggedIn && selectedDeviceId) {
+      void loadSensorHistory(selectedDeviceId, chartHours);
+      void loadPumpStatus(selectedDeviceId);
+    }
+  }, [chartHours, isLoggedIn, selectedDeviceId]);
 
   async function loadDevices() {
     try {
@@ -103,6 +133,96 @@ export default function Dashboard() {
       console.error("Error loading devices:", error);
     } finally {
       setDevicesLoading(false);
+    }
+  }
+
+  async function loadSensorHistory(deviceId: string, hours: number) {
+    try {
+      setChartLoading(true);
+      const limit = Math.max(12, hours * 2);
+      const response = await fetchSensorHistory(deviceId, limit);
+
+      if (response.error) {
+        console.error("Failed to load sensor history:", response.error);
+        setSensorHistory([]);
+        return;
+      }
+
+      const items = (response.data ?? [])
+        .slice()
+        .reverse()
+        .map((entry) => ({
+          createdAt: entry.createdAt,
+          timeLabel: new Date(entry.createdAt).toLocaleTimeString("tr-TR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          moisture: entry.moisture,
+          temperature: entry.temperature,
+          ph: entry.ph,
+        }));
+
+      setSensorHistory(items);
+
+      const latest = items[items.length - 1];
+      if (latest) {
+        setCurrentSensorData({
+          moisture: latest.moisture,
+          temperature: latest.temperature,
+          ph: latest.ph,
+          timestamp: latest.createdAt,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading sensor history:", error);
+      setSensorHistory([]);
+    } finally {
+      setChartLoading(false);
+    }
+  }
+
+  async function loadPumpStatus(deviceId: string) {
+    try {
+      setPumpError("");
+      const response = await fetchPumpStatus(deviceId);
+      if (response.error) {
+        setPumpError(response.error);
+        return;
+      }
+
+      if (response.data) {
+        setPumpStatus(response.data);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Pompa durumu alınamadı";
+      setPumpError(message);
+    }
+  }
+
+  async function handlePumpControl(action: "on" | "off") {
+    if (!selectedDeviceId) {
+      return;
+    }
+
+    try {
+      setPumpLoading(true);
+      setPumpError("");
+
+      const response = action === "on" ? await turnPumpOn(selectedDeviceId) : await turnPumpOff(selectedDeviceId);
+
+      if (response.error) {
+        setPumpError(response.error);
+        return;
+      }
+
+      if (response.data) {
+        setPumpStatus(response.data);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Pompa komutu gönderilemedi";
+      setPumpError(message);
+    } finally {
+      setPumpLoading(false);
     }
   }
 
@@ -126,13 +246,42 @@ export default function Dashboard() {
     });
 
     socket.on("sensor-data", (payload: { deviceId: string; moisture: number; temperature: number; ph: number }) => {
-      if (payload.deviceId === selectedDeviceId) {
+      if (payload.deviceId === selectedDeviceIdRef.current) {
+        const nowIso = new Date().toISOString();
+
         setCurrentSensorData({
           moisture: payload.moisture,
           temperature: payload.temperature,
           ph: payload.ph,
-          timestamp: new Date().toISOString(),
+          timestamp: nowIso,
         });
+
+        setSensorHistory((current) => {
+          const nextPoint: SensorChartPoint = {
+            createdAt: nowIso,
+            timeLabel: new Date(nowIso).toLocaleTimeString("tr-TR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            moisture: payload.moisture,
+            temperature: payload.temperature,
+            ph: payload.ph,
+          };
+
+          const maxPoints = Math.max(24, chartHours * 2);
+          return [...current, nextPoint].slice(-maxPoints);
+        });
+      }
+    });
+
+    socket.on("pump-status", (payload: { deviceId: string; status: "ON" | "OFF"; lastAction?: string; lastReason?: string }) => {
+      if (payload.deviceId === selectedDeviceIdRef.current) {
+        setPumpStatus((current) => ({
+          deviceId: payload.deviceId,
+          status: payload.status,
+          lastAction: payload.lastAction ?? current.lastAction,
+          lastReason: payload.lastReason ?? current.lastReason,
+        }));
       }
     });
 
@@ -197,6 +346,13 @@ export default function Dashboard() {
     setSelectedDeviceId("");
     setCurrentSensorData(null);
     setSocketConnected(false);
+    setPumpError("");
+    setPumpStatus({
+      deviceId: "",
+      status: "OFF",
+      lastAction: "",
+      lastReason: "",
+    });
   }
 
   // Login/Register screen
@@ -314,10 +470,24 @@ export default function Dashboard() {
 
         <main className={styles.mainContent}>
           <SensorPanel data={currentSensorData} isLoading={false} />
+          <SensorChartPanel
+            points={sensorHistory}
+            loading={chartLoading}
+            selectedHours={chartHours}
+            onHoursChange={setChartHours}
+          />
         </main>
 
         <aside className={styles.sidebar}>
-          <PumpControlPanel deviceId={selectedDeviceId || "N/A"} />
+          <PumpControlPanel
+            deviceId={selectedDeviceId || "N/A"}
+            pumpStatus={pumpStatus.status}
+            lastReason={pumpStatus.lastReason}
+            lastAction={pumpStatus.lastAction}
+            errorMessage={pumpError}
+            isLoading={pumpLoading}
+            onControlChange={handlePumpControl}
+          />
         </aside>
       </div>
     </div>

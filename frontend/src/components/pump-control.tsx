@@ -5,39 +5,49 @@ import styles from "./pump-control.module.css";
 
 interface PumpControlPanelProps {
   deviceId: string;
+  pumpStatus: "ON" | "OFF";
+  lastReason?: string;
+  lastAction?: string;
+  errorMessage?: string;
   onControlChange?: (action: "on" | "off") => void;
   isLoading?: boolean;
 }
 
 export function PumpControlPanel({
   deviceId,
+  pumpStatus,
+  lastReason,
+  lastAction,
+  errorMessage,
   onControlChange,
   isLoading = false,
 }: PumpControlPanelProps) {
-  const [pumpStatus, setPumpStatus] = useState<"off" | "on" | "auto">("off");
   const [manualMode, setManualMode] = useState(false);
 
   const handlePumpOn = () => {
-    setPumpStatus("on");
     onControlChange?.("on");
   };
 
   const handlePumpOff = () => {
-    setPumpStatus("off");
     onControlChange?.("off");
   };
 
   const handleAutoMode = () => {
-    setManualMode(!manualMode);
-    setPumpStatus(manualMode ? "off" : "auto");
+    setManualMode((current) => !current);
   };
 
+  const effectiveStatus = manualMode ? pumpStatus : "AUTO";
+
   const statusColor =
-    pumpStatus === "on" ? "green" : pumpStatus === "off" ? "red" : "blue";
+    effectiveStatus === "ON"
+      ? "green"
+      : effectiveStatus === "OFF"
+        ? "red"
+        : "blue";
   const statusText =
-    pumpStatus === "on"
+    effectiveStatus === "ON"
       ? "AÇIK"
-      : pumpStatus === "off"
+      : effectiveStatus === "OFF"
         ? "KAPALI"
         : "OTOMATİK";
 
@@ -53,19 +63,19 @@ export function PumpControlPanel({
         <div className={styles.buttonGroup}>
           <button
             className={`${styles.button} ${styles.on} ${
-              pumpStatus === "on" ? styles.active : ""
+              pumpStatus === "ON" ? styles.active : ""
             }`}
             onClick={handlePumpOn}
-            disabled={isLoading || manualMode === false}
+            disabled={isLoading || !manualMode || !deviceId || deviceId === "N/A"}
           >
             🟢 Aç
           </button>
           <button
             className={`${styles.button} ${styles.off} ${
-              pumpStatus === "off" ? styles.active : ""
+              pumpStatus === "OFF" ? styles.active : ""
             }`}
             onClick={handlePumpOff}
-            disabled={isLoading || manualMode === false}
+            disabled={isLoading || !manualMode || !deviceId || deviceId === "N/A"}
           >
             🔴 Kapat
           </button>
@@ -84,7 +94,15 @@ export function PumpControlPanel({
           {!manualMode && (
             <p className={styles.autoNote}>⚙️ Otomatik mod aktif - sistem yönetiyor</p>
           )}
+          {errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
         </div>
+
+        {(lastReason || lastAction) && (
+          <div className={styles.metaInfo}>
+            {lastReason && <div>Son neden: {lastReason}</div>}
+            {lastAction && <div>Son aksiyon: {new Date(lastAction).toLocaleString("tr-TR")}</div>}
+          </div>
+        )}
 
         <div className={styles.deviceInfo}>
           <small>Cihaz: {deviceId}</small>

@@ -26,6 +26,13 @@ export interface SensorData {
   createdAt: string;
 }
 
+export interface PumpStatusResponse {
+  deviceId: string;
+  status: "ON" | "OFF";
+  lastAction: string;
+  lastReason: string;
+}
+
 /**
  * Korumalı API çağrısı yapar - Authorization header'ı ekler
  * @param url API endpoint'i (örn: '/devices')
@@ -99,6 +106,59 @@ export async function emitTestSensorData(
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   return fetchWithToken<SensorData>(`${baseUrl}/sensors/${deviceId}/test`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Cihaza ait son sensör verilerini getir
+ */
+export async function fetchSensorHistory(
+  deviceId: string,
+  limit = 48,
+): Promise<ApiResponse<SensorData[]>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<SensorData[]>(`${baseUrl}/sensors/${deviceId}?limit=${limit}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Cihazin pompa durumunu getir
+ */
+export async function fetchPumpStatus(
+  deviceId: string,
+): Promise<ApiResponse<PumpStatusResponse>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<PumpStatusResponse>(`${baseUrl}/pump/status/${deviceId}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Pompayi ac
+ */
+export async function turnPumpOn(
+  deviceId: string,
+): Promise<ApiResponse<PumpStatusResponse>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<PumpStatusResponse>(`${baseUrl}/pump/on/${deviceId}`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Pompayi kapat
+ */
+export async function turnPumpOff(
+  deviceId: string,
+): Promise<ApiResponse<PumpStatusResponse>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<PumpStatusResponse>(`${baseUrl}/pump/off/${deviceId}`, {
     method: 'POST',
   });
 }
