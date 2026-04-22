@@ -47,15 +47,12 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const database_service_1 = require("../../common/database.service");
-const config_service_1 = require("../../config/config.service");
 let AuthService = class AuthService {
     db;
     jwtService;
-    configService;
-    constructor(db, jwtService, configService) {
+    constructor(db, jwtService) {
         this.db = db;
         this.jwtService = jwtService;
-        this.configService = configService;
     }
     async register(registerDto) {
         const { email, name, password } = registerDto;
@@ -125,7 +122,6 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [database_service_1.DatabaseService,
-        jwt_1.JwtService,
-        config_service_1.ConfigService])
+        jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

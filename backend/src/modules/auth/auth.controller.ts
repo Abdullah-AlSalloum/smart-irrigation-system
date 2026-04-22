@@ -6,7 +6,7 @@ import { LoginDto, RegisterDto, AuthResponseDto } from './auth.dto';
  * Kimlik Doğrulama Kontrolcüsü
  * Kullanıcı kaydı ve girişi işlemlerini yönetir
  */
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

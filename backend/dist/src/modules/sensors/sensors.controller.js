@@ -66,7 +66,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SensorsController.prototype, "getSensorStatistics", null);
 exports.SensorsController = SensorsController = __decorate([
-    (0, common_1.Controller)('api/sensors'),
+    (0, common_1.Controller)('sensors'),
     __metadata("design:paramtypes", [sensors_service_1.SensorsService])
 ], SensorsController);
 //# sourceMappingURL=sensors.controller.js.map

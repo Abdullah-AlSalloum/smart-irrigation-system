@@ -19,7 +19,7 @@ import { CreateDeviceDto, UpdateDeviceDto, DeviceResponseDto } from './devices.d
  * Cihaz Kontrolcüsü
  * Cihaz işlemlerini API aracılığıyla sunma
  */
-@Controller('api/devices')
+@Controller('devices')
 @UseGuards(AuthGuard('jwt'))
 export class DevicesController {
   constructor(private devicesService: DevicesService) {}

@@ -13,7 +13,6 @@ const passport_1 = require("@nestjs/passport");
 const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const jwt_strategy_1 = require("./jwt.strategy");
-const config_service_1 = require("../../config/config.service");
 const database_service_1 = require("../../common/database.service");
 let AuthModule = class AuthModule {
 };
@@ -22,17 +21,14 @@ exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
             passport_1.PassportModule.register({ defaultStrategy: 'jwt' }),
-            jwt_1.JwtModule.registerAsync({
-                inject: [config_service_1.ConfigService],
-                useFactory: (configService) => ({
-                    secret: configService.jwtSecret,
-                    signOptions: {
-                        expiresIn: 86400,
-                    },
-                }),
+            jwt_1.JwtModule.register({
+                secret: process.env.JWT_SECRET || 'default-secret-key',
+                signOptions: {
+                    expiresIn: 86400,
+                },
             }),
         ],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, config_service_1.ConfigService, database_service_1.DatabaseService],
+        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, database_service_1.DatabaseService],
         controllers: [auth_controller_1.AuthController],
         exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule, auth_service_1.AuthService],
     })

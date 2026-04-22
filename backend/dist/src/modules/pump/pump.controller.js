@@ -119,7 +119,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PumpController.prototype, "getPumpStatusByQuery", null);
 exports.PumpController = PumpController = __decorate([
-    (0, common_1.Controller)('api/pump'),
+    (0, common_1.Controller)('pump'),
     __metadata("design:paramtypes", [pump_service_1.PumpService,
         devices_service_1.DevicesService])
 ], PumpController);

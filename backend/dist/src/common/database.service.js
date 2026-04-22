@@ -12,9 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const adapter_pg_1 = require("@prisma/adapter-pg");
 let DatabaseService = class DatabaseService extends client_1.PrismaClient {
     constructor() {
-        super();
+        const connectionString = process.env.DATABASE_URL;
+        if (!connectionString) {
+            throw new Error('DATABASE_URL tanimlanmamis. Lutfen .env dosyasini kontrol edin.');
+        }
+        const adapter = new adapter_pg_1.PrismaPg({ connectionString });
+        super({ adapter });
     }
     async onModuleInit() {
         await this.$connect();

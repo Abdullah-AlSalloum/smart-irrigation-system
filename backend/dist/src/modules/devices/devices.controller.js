@@ -82,7 +82,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DevicesController.prototype, "deleteDevice", null);
 exports.DevicesController = DevicesController = __decorate([
-    (0, common_1.Controller)('api/devices'),
+    (0, common_1.Controller)('devices'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     __metadata("design:paramtypes", [devices_service_1.DevicesService])
 ], DevicesController);

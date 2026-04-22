@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { DatabaseService } from '../../common/database.service';
 import { LoginDto, RegisterDto, AuthResponseDto } from './auth.dto';
-import { ConfigService } from '../../config/config.service';
 
 /**
  * Kimlik Doğrulama Servis
@@ -14,7 +13,6 @@ export class AuthService {
   constructor(
     private db: DatabaseService,
     private jwtService: JwtService,
-    private configService: ConfigService,
   ) {}
 
   /**

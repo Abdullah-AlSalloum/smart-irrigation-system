@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as dotenv from 'dotenv';
-import * as fs from 'fs';
-import * as path from 'path';
 
 /**
  * Yapılandırma Servis
@@ -12,8 +9,7 @@ export class ConfigService {
   private readonly envConfig: Record<string, any>;
 
   constructor() {
-    const envPath = path.resolve(__dirname, '../../.env');
-    this.envConfig = dotenv.parse(fs.readFileSync(envPath));
+    this.envConfig = process.env;
   }
 
   get(key: string): string | undefined {

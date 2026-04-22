@@ -20,7 +20,7 @@ import { DevicesService } from '../devices/devices.service';
  * Pompa Kontrolcüsü
  * Pompa kontrol işlemlerini API aracılığıyla sunma
  */
-@Controller('api/pump')
+@Controller('pump')
 export class PumpController {
   constructor(
     private pumpService: PumpService,

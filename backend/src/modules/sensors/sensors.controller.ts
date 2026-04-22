@@ -17,7 +17,7 @@ import { CreateSensorDataDto, SensorDataResponseDto, SensorStatisticsDto } from 
  * Sensör Kontrolcüsü
  * Sensör verisi işlemlerini API aracılığıyla sunma
  */
-@Controller('api/sensors')
+@Controller('sensors')
 export class SensorsController {
   constructor(private sensorsService: SensorsService) {}
 
