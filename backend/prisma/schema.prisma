@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Kullanıcı Modeli / User Model
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  devices   Device[]
+  
+  @@map("users")
+}
+
+// Cihaz Modeli / Device Model
+model Device {
+  id        String        @id @default(cuid())
+  name      String
+  status    String        @default("online") // online, offline, error
+  lastSeen  DateTime      @default(now()) @updatedAt
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sensors   SensorData[]
+  pumps     PumpLog[]
+  
+  @@map("devices")
+}
+
+// Sensör Verisi Modeli / Sensor Data Model
+model SensorData {
+  id          String    @id @default(cuid())
+  deviceId    String
+  device      Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  moisture    Float     // Toprak Nemi %
+  temperature Float     // Sıcaklık °C
+  ph          Float     // pH Seviyesi
+  createdAt   DateTime  @default(now())
+  
+  @@index([deviceId])
+  @@index([createdAt])
+  @@map("sensor_data")
+}
+
+// Pompa Kontrol Modeli / Pump Control Model
+model PumpLog {
+  id        String    @id @default(cuid())
+  deviceId  String
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  action    String    // ON, OFF
+  reason    String    // Neden açıldı/kapandı
+  timestamp DateTime  @default(now())
+  
+  @@index([deviceId])
+  @@index([timestamp])
+  @@map("pump_logs")
+}
+
+// Alarm/Uyarı Modeli / Alert Model
+model Alert {
+  id        String    @id @default(cuid())
+  deviceId  String
+  type      String    // moisture, temperature, ph
+  message   String
+  severity  String    // info, warning, critical
+  isRead    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  
+  @@index([deviceId])
+  @@map("alerts")
+}
+
