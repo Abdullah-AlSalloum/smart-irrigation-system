@@ -8,6 +8,8 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Request,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SensorsService } from './sensors.service';
@@ -33,9 +35,23 @@ export class SensorsController {
     @Body() createSensorDataDto: CreateSensorDataDto,
   ): Promise<SensorDataResponseDto> {
     if (!deviceId) {
-      throw new Error('deviceId parametresi gereklidir');
+      throw new BadRequestException('deviceId parametresi gereklidir');
     }
     return this.sensorsService.createSensorData(deviceId, createSensorDataDto);
+  }
+
+  /**
+   * POST /api/sensors/:deviceId/test
+   * Secili cihaz icin test sensör verisi üretir
+   */
+  @Post(':deviceId/test')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.CREATED)
+  async createTestSensorData(
+    @Param('deviceId') deviceId: string,
+    @Request() req: any,
+  ): Promise<SensorDataResponseDto> {
+    return this.sensorsService.createTestSensorData(deviceId, req.user.id);
   }
 
   /**

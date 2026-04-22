@@ -1,0 +1,161 @@
+.panel {
+  background: linear-gradient(135deg, #1e3a5f 0%, #243b4a 100%);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.panel h2 {
+  color: #4db8ff;
+  margin: 0 0 20px 0;
+  font-size: 22px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.statusDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(77, 184, 255, 0.08);
+  border: 2px solid rgba(77, 184, 255, 0.2);
+  border-radius: 6px;
+  padding: 16px;
+  justify-content: center;
+}
+
+.statusLight {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.statusLight.green {
+  background: #4caf50;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
+}
+
+.statusLight.red {
+  background: #f44336;
+  box-shadow: 0 0 12px rgba(244, 67, 54, 0.6);
+}
+
+.statusLight.blue {
+  background: #2196f3;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.6);
+}
+
+.statusText {
+  color: #e0e0e0;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.buttonGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.button {
+  padding: 16px 20px;
+  border: 2px solid;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.button.on {
+  border-color: #4caf50;
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.button.on:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+}
+
+.button.on.active {
+  background: rgba(76, 175, 80, 0.3);
+  box-shadow: inset 0 0 12px rgba(76, 175, 80, 0.4);
+}
+
+.button.off {
+  border-color: #f44336;
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.button.off:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.2);
+  box-shadow: 0 0 12px rgba(244, 67, 54, 0.3);
+}
+
+.button.off.active {
+  background: rgba(244, 67, 54, 0.3);
+  box-shadow: inset 0 0 12px rgba(244, 67, 54, 0.4);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.autoModeSection {
+  background: rgba(33, 150, 243, 0.08);
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.checkbox input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.autoNote {
+  color: #2196f3;
+  font-size: 12px;
+  margin: 8px 0 0 0;
+}
+
+.deviceInfo {
+  color: #606060;
+  font-size: 12px;
+  text-align: center;
+  border-top: 1px solid rgba(77, 184, 255, 0.1);
+  padding-top: 12px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}

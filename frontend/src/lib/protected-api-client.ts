@@ -17,6 +17,15 @@ export interface CreateDevicePayload {
   description?: string;
 }
 
+export interface SensorData {
+  id: string;
+  deviceId: string;
+  moisture: number;
+  temperature: number;
+  ph: number;
+  createdAt: string;
+}
+
 /**
  * Korumalı API çağrısı yapar - Authorization header'ı ekler
  * @param url API endpoint'i (örn: '/devices')
@@ -78,5 +87,18 @@ export async function createDevice(
   return fetchWithToken<Device>(`${baseUrl}/devices`, {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Test sensör verisi uret
+ */
+export async function emitTestSensorData(
+  deviceId: string,
+): Promise<ApiResponse<SensorData>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<SensorData>(`${baseUrl}/sensors/${deviceId}/test`, {
+    method: 'POST',
   });
 }

@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DatabaseService } from '../../common/database.service';
 import { CreateSensorDataDto, SensorDataResponseDto, SensorStatisticsDto } from './sensors.dto';
 
@@ -8,7 +14,10 @@ import { CreateSensorDataDto, SensorDataResponseDto, SensorStatisticsDto } from 
  */
 @Injectable()
 export class SensorsService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Sensör Verisi Oluştur / Create Sensor Data
@@ -18,7 +27,31 @@ export class SensorsService {
     deviceId: string,
     createSensorDataDto: CreateSensorDataDto,
   ): Promise<SensorDataResponseDto> {
-    // Cihaz var mı kontrol et
+    await this.ensureDeviceExists(deviceId);
+
+    // Sensör verilerini doğrula
+    this.validateSensorData(createSensorDataDto);
+
+    const sensorData = await this.persistSensorData(deviceId, createSensorDataDto);
+
+    this.eventEmitter.emit('sensor.data.received', {
+      deviceId,
+      moisture: sensorData.moisture,
+      temperature: sensorData.temperature,
+      ph: sensorData.ph,
+      createdAt: sensorData.createdAt,
+    });
+
+    return this.mapToResponseDto(sensorData);
+  }
+
+  /**
+   * Test için sahte sensör verisi üret ve kaydet
+   */
+  async createTestSensorData(
+    deviceId: string,
+    userId: string,
+  ): Promise<SensorDataResponseDto> {
     const device = await this.db.device.findUnique({
       where: { id: deviceId },
     });
@@ -27,26 +60,17 @@ export class SensorsService {
       throw new NotFoundException('Cihaz bulunamadı');
     }
 
-    // Sensör verilerini doğrula
-    this.validateSensorData(createSensorDataDto);
+    if (device.userId !== userId) {
+      throw new ForbiddenException('Bu cihaza erişim yetkiniz yok');
+    }
 
-    // Sensör verisi kaydet
-    const sensorData = await this.db.sensorData.create({
-      data: {
-        deviceId,
-        moisture: createSensorDataDto.moisture,
-        temperature: createSensorDataDto.temperature,
-        ph: createSensorDataDto.ph,
-      },
-    });
+    const createSensorDataDto: CreateSensorDataDto = {
+      moisture: this.randomBetween(35, 70),
+      temperature: this.randomBetween(18, 32),
+      ph: this.randomBetween(5.8, 7.1),
+    };
 
-    // Cihazın son görülme zamanını güncelle
-    await this.db.device.update({
-      where: { id: deviceId },
-      data: { lastSeen: new Date() },
-    });
-
-    return this.mapToResponseDto(sensorData);
+    return this.createSensorData(deviceId, createSensorDataDto);
   }
 
   /**
@@ -132,6 +156,41 @@ export class SensorsService {
     if (data.ph < 0 || data.ph > 14) {
       throw new BadRequestException('pH değeri 0-14 arasında olmalıdır');
     }
+  }
+
+  private async ensureDeviceExists(deviceId: string): Promise<void> {
+    const device = await this.db.device.findUnique({
+      where: { id: deviceId },
+    });
+
+    if (!device) {
+      throw new NotFoundException('Cihaz bulunamadı');
+    }
+  }
+
+  private async persistSensorData(
+    deviceId: string,
+    createSensorDataDto: CreateSensorDataDto,
+  ) {
+    const sensorData = await this.db.sensorData.create({
+      data: {
+        deviceId,
+        moisture: createSensorDataDto.moisture,
+        temperature: createSensorDataDto.temperature,
+        ph: createSensorDataDto.ph,
+      },
+    });
+
+    await this.db.device.update({
+      where: { id: deviceId },
+      data: { lastSeen: new Date() },
+    });
+
+    return sensorData;
+  }
+
+  private randomBetween(min: number, max: number): number {
+    return Math.round((Math.random() * (max - min) + min) * 100) / 100;
   }
 
   /**

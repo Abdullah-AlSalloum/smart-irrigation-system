@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SensorGateway } from './sensor.gateway';
 
 /**
@@ -7,7 +6,6 @@ import { SensorGateway } from './sensor.gateway';
  * Real-time iletişim yönetir
  */
 @Module({
-  imports: [EventEmitterModule.forRoot()],
   providers: [SensorGateway],
   exports: [SensorGateway],
 })
