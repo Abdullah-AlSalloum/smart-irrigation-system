@@ -5,6 +5,12 @@ interface ApiResponse<T> {
   error?: string;
 }
 
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler;
+}
+
 export interface Device {
   id: string;
   name: string;
@@ -56,6 +62,7 @@ export async function fetchWithToken<T>(
   const token = getStoredToken();
 
   if (!token) {
+    unauthorizedHandler?.();
     return { error: 'Token bulunamadı - lütfen giriş yapın' };
   }
 
@@ -70,6 +77,9 @@ export async function fetchWithToken<T>(
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        unauthorizedHandler?.();
+      }
       return {
         error: `HTTP ${response.status}: ${response.statusText}`,
       };

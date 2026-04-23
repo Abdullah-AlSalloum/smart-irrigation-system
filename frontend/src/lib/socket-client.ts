@@ -9,6 +9,7 @@ export function getSocketBaseUrl(): string {
 export function createSensorSocket(): Socket {
   return io(getSocketBaseUrl(), {
     autoConnect: false,
-    transports: ["websocket"],
+    transports: ["polling"],
+    upgrade: false,
   });
 }

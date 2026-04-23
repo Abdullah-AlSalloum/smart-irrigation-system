@@ -16,11 +16,15 @@ import { Logger } from '@nestjs/common';
 @WebSocketGateway({
   cors: {
     origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true,
 })
 export class SensorGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(SensorGateway.name);
 
