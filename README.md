@@ -24,7 +24,20 @@ cd sulama-sistem
 cd backend
 npm install
 cp .env.example .env
-# .env dosyasını düzenleyerek DATABASE_URL ve JWT_SECRET değerlerini girin
+```
+
+`.env` dosyasını açıp şu değerleri doldurun:
+
+- `DATABASE_URL` — PostgreSQL bağlantı adresiniz
+- `JWT_SECRET` — Güçlü rastgele bir anahtar oluşturun:
+
+```bash
+openssl rand -hex 48
+```
+
+Çıktıyı kopyalayıp `.env` dosyasındaki `JWT_SECRET` değerine yapıştırın.
+
+```bash
 npx prisma migrate deploy
 npm run start:dev
 ```
@@ -58,6 +71,7 @@ Frontend `http://localhost:3000` adresinde çalışır.
    #define SERVER_URL      "http://SUNUCU_IP:3002/api"
    #define DEVICE_ID       "sisteme-kayitli-cihaz-id"
    ```
+   > **Not:** `DEVICE_ID` değerini, frontend dashboard üzerinden yeni bir cihaz ekledikten sonra elde edersiniz. Dashboard → Cihaz Ekle → oluşturulan cihazın ID'sini kopyalayın.
 5. ESP32'ye yükleyin
 
 ## API Uç Noktaları
