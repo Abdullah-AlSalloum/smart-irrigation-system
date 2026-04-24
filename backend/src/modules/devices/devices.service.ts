@@ -110,9 +110,13 @@ export class DevicesService {
       throw new ForbiddenException('Bu cihaza erişim yetkiniz yok');
     }
 
-    await this.db.device.delete({
-      where: { id: deviceId },
-    });
+    // İlişkili kayıtları da temizle; FK migration eksik olsa bile veriler artık kalmaz.
+    await this.db.$transaction([
+      this.db.alert.deleteMany({ where: { deviceId } }),
+      this.db.sensorData.deleteMany({ where: { deviceId } }),
+      this.db.pumpLog.deleteMany({ where: { deviceId } }),
+      this.db.device.delete({ where: { id: deviceId } }),
+    ]);
   }
 
   /**

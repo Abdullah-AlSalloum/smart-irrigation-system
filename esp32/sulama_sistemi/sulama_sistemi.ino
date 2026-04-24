@@ -26,7 +26,7 @@
 #define PIN_RELAY       26
 #define PIN_LED         2
 
-#define SENSOR_INTERVAL_MS   10000
+#define SENSOR_INTERVAL_MS   5000
 #define PUMP_CHECK_MS        15000
 
 // Kalibrasyon
@@ -133,7 +133,7 @@ void checkPumpStatus() {
   if (WiFi.status() != WL_CONNECTED) return;
 
   HTTPClient http;
-  String url = String(SERVER_URL) + "/pump/status/" + DEVICE_ID;
+  String url = String(SERVER_URL) + "/pump/status?deviceId=" + DEVICE_ID;
   http.begin(url);
 
   Serial.printf("[POMPA] GET %s\n", url.c_str());

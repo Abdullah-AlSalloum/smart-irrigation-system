@@ -77,16 +77,16 @@ export function PumpControlPanel({
               disabled={isLoading}
               aria-pressed={manualMode}
               className={[
-                "relative h-7 w-14 rounded-full border transition-all duration-200",
+                "relative h-6 w-11 rounded-full border transition-colors duration-200",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
-                manualMode ? "border-sky-300/60 bg-sky-500/25" : "border-slate-600 bg-slate-800",
+                manualMode ? "border-sky-400/60 bg-sky-500" : "border-slate-600 bg-slate-700",
                 isLoading ? "cursor-not-allowed opacity-60" : "cursor-pointer",
               ].join(" ")}
             >
               <span
                 className={[
-                  "absolute top-[2px] h-5 w-5 rounded-full bg-slate-100 shadow transition-transform duration-200",
-                  manualMode ? "translate-x-7" : "translate-x-1",
+                  "absolute top-[2px] left-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform duration-200",
+                  manualMode ? "translate-x-5" : "translate-x-0",
                 ].join(" ")}
               />
             </button>

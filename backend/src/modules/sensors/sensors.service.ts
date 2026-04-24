@@ -183,7 +183,7 @@ export class SensorsService {
 
     await this.db.device.update({
       where: { id: deviceId },
-      data: { lastSeen: new Date() },
+      data: { lastSeen: new Date(), status: 'online' },
     });
 
     return sensorData;

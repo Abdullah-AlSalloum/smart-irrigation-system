@@ -85,7 +85,9 @@ export async function fetchWithToken<T>(
       };
     }
 
-    const data = await response.json() as T;
+    const contentLength = response.headers.get('content-length');
+    const hasBody = contentLength !== '0' && response.status !== 204;
+    const data = hasBody ? await response.json() as T : undefined as T;
     return { data };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Bilinmeyen hata';
@@ -114,6 +116,19 @@ export async function createDevice(
   return fetchWithToken<Device>(`${baseUrl}/devices`, {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Cihaz sil
+ */
+export async function deleteDevice(
+  deviceId: string,
+): Promise<ApiResponse<void>> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  return fetchWithToken<void>(`${baseUrl}/devices/${deviceId}`, {
+    method: 'DELETE',
   });
 }
 

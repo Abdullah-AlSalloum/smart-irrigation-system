@@ -32,7 +32,9 @@ export class ConfigService {
 
   // JWT Configuration
   get jwtSecret(): string {
-    return this.get('JWT_SECRET') || 'default-secret-key';
+    const secret = this.get('JWT_SECRET');
+    if (!secret) throw new Error('JWT_SECRET tanimlanmamis. Lutfen .env dosyasini kontrol edin.');
+    return secret;
   }
 
   get jwtExpiration(): string {
@@ -41,7 +43,7 @@ export class ConfigService {
 
   // Application Configuration
   get port(): number {
-    return this.getNumber('PORT') || 3000;
+    return this.getNumber('PORT') || 3002;
   }
 
   get nodeEnv(): string {

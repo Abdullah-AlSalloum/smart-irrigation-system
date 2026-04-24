@@ -5,6 +5,9 @@ import type { Socket } from "socket.io-client";
 import { registerUser } from "@/lib/api-client";
 import { clearStoredToken, getStoredToken, loginAndStoreToken } from "@/lib/auth-service";
 import {
+  createDevice,
+  deleteDevice,
+  emitTestSensorData,
   fetchAlerts,
   fetchDevices,
   fetchPumpStatus,
@@ -132,11 +135,26 @@ export default function Dashboard() {
         return;
       }
 
-      if (response.data && response.data.length > 0) {
-        setDevices(response.data);
-        if (!selectedDeviceId) {
-          setSelectedDeviceId(response.data[0].id);
-        }
+      const nextDevices = response.data ?? [];
+      setDevices(nextDevices);
+
+      if (nextDevices.length === 0) {
+        setSelectedDeviceId("");
+        setCurrentSensorData(null);
+        setSensorHistory([]);
+        setAlerts([]);
+        setPumpStatus({
+          deviceId: "",
+          status: "OFF",
+          lastAction: "",
+          lastReason: "",
+        });
+        return;
+      }
+
+      const selectedStillExists = nextDevices.some((device) => device.id === selectedDeviceId);
+      if (!selectedDeviceId || !selectedStillExists) {
+        setSelectedDeviceId(nextDevices[0].id);
       }
     } catch (error) {
       console.error("Error loading devices:", error);
@@ -230,6 +248,28 @@ export default function Dashboard() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Pompa durumu alınamadı";
       setPumpError(message);
+    }
+  }
+
+  const [testLoading, setTestLoading] = useState(false);
+  const [testMessage, setTestMessage] = useState("");
+
+  async function handleSendTestData() {
+    if (!selectedDeviceId) return;
+    try {
+      setTestLoading(true);
+      setTestMessage("");
+      const response = await emitTestSensorData(selectedDeviceId);
+      if (response.error) {
+        setTestMessage("Hata: " + response.error);
+      } else {
+        setTestMessage("Test verisi gönderildi!");
+        setTimeout(() => setTestMessage(""), 3000);
+      }
+    } catch {
+      setTestMessage("Test verisi gönderilemedi.");
+    } finally {
+      setTestLoading(false);
     }
   }
 
@@ -563,11 +603,43 @@ export default function Dashboard() {
             selectedDeviceId={selectedDeviceId}
             onDeviceChange={setSelectedDeviceId}
             isLoading={devicesLoading}
+            onAddDevice={async (name) => {
+              const response = await createDevice({ name });
+              if (response.error) throw new Error(response.error);
+              await loadDevices();
+              if (response.data) setSelectedDeviceId(response.data.id);
+            }}
+            onDeleteDevice={async (deviceId) => {
+              const response = await deleteDevice(deviceId);
+              if (response.error) throw new Error(response.error);
+              if (selectedDeviceId === deviceId) setSelectedDeviceId("");
+              await loadDevices();
+            }}
           />
         </aside>
 
         <section className="space-y-5">
           <SensorPanel data={currentSensorData} isLoading={false} />
+
+          {selectedDeviceId && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4 flex items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-white">Fiziksel cihaz yok mu?</p>
+                <p className="text-xs text-white/50">Rastgele sensör verisi üretip WebSocket güncellemesini test edin.</p>
+              </div>
+              <button
+                onClick={handleSendTestData}
+                disabled={testLoading}
+                className="shrink-0 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-black transition-colors"
+              >
+                {testLoading ? "Gönderiliyor…" : "Test Verisi Gönder"}
+              </button>
+              {testMessage && (
+                <span className="text-xs text-emerald-400">{testMessage}</span>
+              )}
+            </div>
+          )}
+
           <SensorChartPanel
             points={sensorHistory}
             loading={chartLoading}

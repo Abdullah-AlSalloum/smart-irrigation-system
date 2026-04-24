@@ -116,6 +116,19 @@ export class PumpController {
   }
 
   /**
+   * GET /api/pump/status
+   * Pompa durumunu getir (Query parametresiyle - ESP32 için)
+   * Public endpoint
+   */
+  @Get('status')
+  async getPumpStatusPublic(@Query('deviceId') deviceId: string): Promise<PumpStatusResponseDto> {
+    if (!deviceId) {
+      throw new BadRequestException('deviceId parametresi gereklidir');
+    }
+    return this.pumpService.getPumpStatus(deviceId);
+  }
+
+  /**
    * POST /api/pump/status
    * Pompa durumunu getir (Query parametresiyle - ESP32 için)
    * Public endpoint
