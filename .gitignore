@@ -45,3 +45,18 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Next.js
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# Prisma generated client
+generated/prisma/
+
+# Certificates
+*.pem
+
+# pnpm
+.pnpm-debug.log*

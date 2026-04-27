@@ -4,7 +4,7 @@
   Pin baglantilari
   - Toprak nem sensoru (analog): GPIO34
   - DS18B20 veri: GPIO4 (3.3V'a 4.7k pull-up)
-  - pH analog cikis: GPIO35
+  - pH analog cikis: GPIO32
   - Role girisi: GPIO26 (aktif LOW)
 */
 
@@ -22,7 +22,7 @@
 
 #define PIN_MOISTURE    34
 #define PIN_TEMP        4
-#define PIN_PH          35
+#define PIN_PH          32
 #define PIN_RELAY       26
 #define PIN_LED         2
 
